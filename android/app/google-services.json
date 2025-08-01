@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "228043066675",
+    "project_id": "interntask-41be2",
+    "storage_bucket": "interntask-41be2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:228043066675:android:2e12a2c7ceb8a12e140246",
+        "android_client_info": {
+          "package_name": "com.example.interntask"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuk8mp1IVY8iuGAZcgv8XjSAn_SIxWcPM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

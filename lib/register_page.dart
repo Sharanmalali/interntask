@@ -12,11 +12,29 @@ class _RegisterPageState extends State<RegisterPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  // Email format validator (only accepts gmail.com format)
+  bool isValidEmail(String email) {
+    final emailRegex = RegExp(r'^[\w-\.]+@gmail\.com$');
+    return emailRegex.hasMatch(email);
+  }
+
   Future<void> register() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    if (!isValidEmail(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please use a valid Gmail address (e.g. name@gmail.com)'),
+        ),
+      );
+      return;
+    }
+
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
+        email: email,
+        password: password,
       );
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Registration successful!')),
@@ -24,7 +42,7 @@ class _RegisterPageState extends State<RegisterPage> {
       Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(content: Text('Error: ${e.toString()}')),
       );
     }
   }
@@ -40,7 +58,7 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               children: [
                 const Text(
-                  'Register',
+                  'Create Account',
                   style: TextStyle(
                     fontSize: 36,
                     color: Colors.white,
@@ -50,12 +68,13 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 40),
                 TextField(
                   controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    labelText: 'Email',
+                    labelText: 'Email (e.g. name@gmail.com)',
                     labelStyle: const TextStyle(color: Colors.white70),
                     filled: true,
-                    fillColor: Colors.grey[900],
+                    fillColor: Colors.grey[850],
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -71,7 +90,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     labelText: 'Password',
                     labelStyle: const TextStyle(color: Colors.white70),
                     filled: true,
-                    fillColor: Colors.grey[900],
+                    fillColor: Colors.grey[850],
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,

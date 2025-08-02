@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'login_page.dart';
 import 'register_page.dart';
+import 'home_page.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => const AuthHome(),
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
-        '/home': (context) => const HomePage(),
+        '/home': (context) => const HomePage(), 
       },
     );
   }
@@ -49,22 +50,6 @@ class AuthHome extends StatelessWidget {
               child: const Text("Go to Register"),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: const Center(
-        child: Text(
-          "Welcome Home!",
-          style: TextStyle(color: Colors.white, fontSize: 24),
         ),
       ),
     );

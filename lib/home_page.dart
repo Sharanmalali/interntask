@@ -112,7 +112,7 @@ class _HomePageState extends State<HomePage> {
                           RideOption(icon: Icons.directions_car, label: 'Sedan'),
                           RideOption(icon: Icons.directions_car, label: 'SUV'),
                           RideOption(icon: Icons.electric_car, label: 'EV'),
-                          RideOption(icon: Icons.local_taxi, label: 'Taxi'),
+                          RideOption(icon: Icons.local_taxi, label: 'Hatchback'),
                         ],
                       ),
                     ),

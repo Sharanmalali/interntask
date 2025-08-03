@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart'; // ✅ Make sure this file exists
 import 'login_page.dart';
 import 'register_page.dart';
-import 'home_page.dart'; 
+import 'home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+
+  // ✅ Initialize Firebase for correct platform (Android/Web/iOS/etc.)
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const MyApp());
 }
 
@@ -24,7 +30,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => const AuthHome(),
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
-        '/home': (context) => const HomePage(), 
+        '/home': (context) => const HomePage(),
       },
     );
   }
@@ -45,7 +51,7 @@ class AuthHome extends StatelessWidget {
               onPressed: () => Navigator.pushNamed(context, '/login'),
               child: const Text("Login"),
             ),
-            const SizedBox(height: 10,),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () => Navigator.pushNamed(context, '/register'),
               child: const Text("Register"),

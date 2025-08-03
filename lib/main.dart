@@ -36,18 +36,19 @@ class AuthHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.grey[900],
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
               onPressed: () => Navigator.pushNamed(context, '/login'),
-              child: const Text("Go to Login"),
+              child: const Text("Login"),
             ),
+            const SizedBox(height: 10,),
             ElevatedButton(
               onPressed: () => Navigator.pushNamed(context, '/register'),
-              child: const Text("Go to Register"),
+              child: const Text("Register"),
             ),
           ],
         ),

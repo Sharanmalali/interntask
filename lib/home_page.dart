@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:interntask/select_car_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -234,23 +235,3 @@ class AdvertisementCard extends StatelessWidget {
   }
 }
 
-class SelectCarPage extends StatelessWidget {
-  const SelectCarPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[900],
-      appBar: AppBar(
-        title: const Text('Select Car Type'),
-        backgroundColor: Colors.grey[850],
-      ),
-      body: const Center(
-        child: Text(
-          'Select your car type here',
-          style: TextStyle(fontSize: 20, color: Colors.white),
-        ),
-      ),
-    );
-  }
-}

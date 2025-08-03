@@ -12,7 +12,7 @@ class _HomePageState extends State<HomePage> {
 
   static const List<Widget> _pages = <Widget>[
     Center(child: Text('Profile Page', style: TextStyle(color: Colors.white))),
-    SizedBox(), // Home page is built inline
+    SizedBox(), // Home page inline
     Center(child: Text('Services Page', style: TextStyle(color: Colors.white))),
   ];
 
@@ -28,16 +28,25 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.grey[900],
       appBar: AppBar(
-        title: const Text('JUST PICK ME UP'),
+        title: const Text(
+          'JUST PICK ME UP',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.grey[850],
+        elevation: 4,
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: 16.0),
-            child: Icon(Icons.directions_car),
+            child: Icon(Icons.directions_car, color: Colors.white),
           ),
         ],
-        backgroundColor: Colors.black,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -52,8 +61,10 @@ class _HomePageState extends State<HomePage> {
                         hintText: 'Enter Pickup Location',
                         filled: true,
                         fillColor: Colors.white10,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        hintStyle: TextStyle(color: Colors.white70),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        hintStyle: const TextStyle(color: Colors.white70),
                       ),
                       style: const TextStyle(color: Colors.white),
                     ),
@@ -64,8 +75,10 @@ class _HomePageState extends State<HomePage> {
                         hintText: 'Enter Destination',
                         filled: true,
                         fillColor: Colors.white10,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        hintStyle: TextStyle(color: Colors.white70),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        hintStyle: const TextStyle(color: Colors.white70),
                       ),
                       style: const TextStyle(color: Colors.white),
                     ),
@@ -81,6 +94,7 @@ class _HomePageState extends State<HomePage> {
                         backgroundColor: Colors.amber,
                         foregroundColor: Colors.black,
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: const Text("Choose Car Type"),
                     ),
@@ -104,8 +118,15 @@ class _HomePageState extends State<HomePage> {
                     ),
                     const SizedBox(height: 24),
                     const Text(
-                      'Select Ride',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                      'Promotions',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    const SizedBox(height: 12),
+                    ListView.builder(
+                      itemCount: 3,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) => AdvertisementCard(index: index),
                     ),
                   ],
                 ),
@@ -113,7 +134,7 @@ class _HomePageState extends State<HomePage> {
             : _pages[_selectedIndex],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.grey[850],
         selectedItemColor: Colors.amber,
         unselectedItemColor: Colors.white,
         currentIndex: _selectedIndex,
@@ -157,19 +178,75 @@ class RideOption extends StatelessWidget {
   }
 }
 
+class AdvertisementCard extends StatelessWidget {
+  final int index;
+
+  const AdvertisementCard({super.key, required this.index});
+
+  @override
+  Widget build(BuildContext context) {
+    final List<String> promoTexts = [
+      "Get 20% off on first ride!",
+      "Refer & Earn ₹100",
+      "Night rides now 15% cheaper"
+    ];
+    final List<IconData> promoIcons = [
+      Icons.discount,
+      Icons.card_giftcard,
+      Icons.nightlight_round,
+    ];
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.grey.shade800, Colors.grey.shade900],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.6),
+            blurRadius: 6,
+            offset: const Offset(2, 4),
+          )
+        ],
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        leading: Icon(promoIcons[index], color: Colors.amberAccent, size: 34),
+        title: Text(
+          promoTexts[index],
+          style: const TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+            letterSpacing: 0.5,
+          ),
+        ),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white60),
+        onTap: () {
+          // Future logic
+        },
+      ),
+    );
+  }
+}
+
 class SelectCarPage extends StatelessWidget {
   const SelectCarPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[900],
       appBar: AppBar(
         title: const Text('Select Car Type'),
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.grey[850],
       ),
-      backgroundColor: Colors.black,
-      body: Center(
-        child: const Text(
+      body: const Center(
+        child: Text(
           'Select your car type here',
           style: TextStyle(fontSize: 20, color: Colors.white),
         ),

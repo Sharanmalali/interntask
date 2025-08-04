@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart'; // ✅ Make sure this file exists
+import 'firebase_options.dart';
 import 'login_page.dart';
 import 'register_page.dart';
 import 'home_page.dart';
+import 'driver_home_page.dart'; // ✅ NEW IMPORT
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // ✅ Initialize Firebase for correct platform (Android/Web/iOS/etc.)
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
   runApp(const MyApp());
 }
 
@@ -31,6 +29,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/home': (context) => const HomePage(),
+        '/driverHome': (context) => const DriverHomePage(), // ✅ NEW ROUTE
       },
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,17 +16,15 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> login() async {
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login successful!')),
-      );
-      Navigator.pushNamed(context, '/home');
+
+      await _navigateBasedOnRole(userCredential.user!.uid);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(content: Text('Login Failed: $e')),
       );
     }
   }
@@ -33,30 +32,115 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return; // User canceled
 
-      if (googleUser == null) {
-        // User cancelled the sign-in
-        return;
-      }
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      await FirebaseAuth.instance.signInWithCredential(credential);
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final uid = userCredential.user!.uid;
+      final email = userCredential.user!.email!;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Google sign-in successful!')),
-      );
-      Navigator.pushNamed(context, '/home');
+      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+      String role;
+
+      if (!doc.exists) {
+        // Ask for role since user doesn't exist yet
+       role = await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+      String tempRole = 'Customer';
+      return AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+        'Select Your Role',
+          style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+        ),
+        textAlign: TextAlign.center,
+      ),
+        content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            'Please choose whether you want to continue as a customer or a driver.',
+            style: TextStyle(fontSize: 14),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          DropdownButtonFormField<String>(
+            value: tempRole,
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              filled: true,
+              fillColor: Colors.grey[200],
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            style: const TextStyle(color: Colors.black, fontSize: 16),
+            dropdownColor: Colors.white,
+            onChanged: (value) {
+              tempRole = value!;
+            },
+            items: const [
+              DropdownMenuItem(value: 'Customer', child: Text('Customer')),
+              DropdownMenuItem(value: 'Driver', child: Text('Driver')),
+            ],
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, tempRole),
+          child: const Text(
+            'Continue',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
+    );
+  },
+);
+
+        await FirebaseFirestore.instance.collection('users').doc(uid).set({
+          'email': email,
+          'role': role,
+        });
+      } else {
+        role = doc.data()!['role'];
+      }
+
+      // Redirect based on role
+      if (role == 'Customer') {
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        Navigator.pushReplacementNamed(context, '/driverHome');
+      }
     } catch (e) {
+      print('Google Sign-In Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Google Sign-In Failed: $e')),
+        SnackBar(content: Text('Google Sign-In failed: ${e.toString()}')),
       );
+    }
+  }
+
+  Future<void> _navigateBasedOnRole(String uid) async {
+    final userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final role = userDoc['role'];
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Login successful as $role!')),
+    );
+
+    if (role == 'Driver') {
+      Navigator.pushReplacementNamed(context, '/driverHome');
+    } else {
+      Navigator.pushReplacementNamed(context, '/home');
     }
   }
 
@@ -159,3 +243,4 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+

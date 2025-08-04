@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:interntask/driverscreens/driver_registration_page.dart';
 
 // Placeholder profile page
 class DriverProfilePage extends StatelessWidget {
@@ -29,8 +30,7 @@ class DriverHomePage extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            const PlaceholderPage(title: 'Driver Registration'),
+        builder: (context) =>  DriverRegistrationPage(),
       ),
     );
   }

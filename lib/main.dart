@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'login_page.dart';
-import 'register_page.dart';
-import 'home_page.dart';
-import 'driver_home_page.dart'; // ✅ NEW IMPORT
+import 'authscreens/login_page.dart';
+import 'authscreens/register_page.dart';
+import 'customerscreens/home_page.dart';
+import 'driverscreens/driver_home_page.dart'; // ✅ NEW IMPORT
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,27 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:interntask/driverscreens/driver_profile_page.dart';
 import 'package:interntask/driverscreens/driver_registration_page.dart';
 
-// Placeholder profile page
-class DriverProfilePage extends StatelessWidget {
-  const DriverProfilePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[900],
-      appBar: AppBar(
-        title: const Text('Driver Profile'),
-        backgroundColor: Colors.grey[850],
-      ),
-      body: const Center(
-        child: Text(
-          'Profile page coming soon!',
-          style: TextStyle(fontSize: 18, color: Colors.white),
-        ),
-      ),
-    );
-  }
-}
 
 class DriverHomePage extends StatelessWidget {
   const DriverHomePage({super.key});

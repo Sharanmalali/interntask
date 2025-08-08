@@ -44,3 +44,4 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 interntask/driver_backend/.env
+driver_backend/serviceAccountKey.json

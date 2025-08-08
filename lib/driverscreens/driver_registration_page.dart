@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart'; // ✅ Import Firebase Auth
 
 class DriverRegistrationPage extends StatefulWidget {
+  const DriverRegistrationPage({super.key}); // ✅ Use const constructor
+
   @override
   _DriverRegistrationPageState createState() => _DriverRegistrationPageState();
 }
@@ -21,45 +24,95 @@ class _DriverRegistrationPageState extends State<DriverRegistrationPage> {
   String selectedCarType = 'Sedan';
   final List<String> carTypes = ['Sedan', 'SUV', 'Hatchback', 'Mini Van'];
 
-  Future<void> registerDriver() async {
-    final url = Uri.parse('http://10.187.64.208:3000/api/drivers/register');
- // adjust for production
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'name': nameController.text,
-        'phone': phoneController.text,
-        'address': addressController.text,
-        'email': emailController.text,
-        'carRegNumber': regNumberController.text,
-        'carType': selectedCarType,
-        'licenseNumber': licenseNumberController.text,
-        'licenseExpiry': licenseExpiryController.text,
-      }),
-    );
+  // ✅ New state variables
+  bool _isLoading = false;
+  
+  // ✅ Pre-fill email from Firebase user
+  @override
+  void initState() {
+    super.initState();
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && user.email != null) {
+      emailController.text = user.email!;
+    }
+  }
 
-    if (response.statusCode == 200) {
+
+  Future<void> registerDriver() async {
+    // ✅ Get the currently logged-in user from Firebase
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("✅ Driver registered successfully")),
+        const SnackBar(content: Text("❌ Error: You must be logged in to register.")),
       );
-      _formKey.currentState!.reset();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ Error: ${response.body}")),
+      return;
+    }
+
+    if (!_formKey.currentState!.validate()) {
+      return; // If form is not valid, do not proceed
+    }
+
+    setState(() {
+      _isLoading = true; // Start loading
+    });
+
+    final url = Uri.parse('http://10.187.64.208:3000/api/drivers/register');
+    
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'name': nameController.text,
+          'phone': phoneController.text,
+          'address': addressController.text,
+          'email': emailController.text,
+          'carRegNumber': regNumberController.text,
+          'carType': selectedCarType,
+          'licenseNumber': licenseNumberController.text,
+          'licenseExpiry': licenseExpiryController.text,
+          'firebase_uid': user.uid, // ✅ Send the Firebase UID
+        }),
       );
+
+      if (mounted) { // Check if the widget is still in the tree
+        if (response.statusCode == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("✅ Driver registered successfully")),
+          );
+          Navigator.pop(context); // Go back to home page on success
+        } else {
+          // Decode the error message from the server
+          final errorBody = json.decode(response.body);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("❌ Error: ${errorBody['error']}")),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("❌ An error occurred: $e")),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false; // Stop loading
+        });
+      }
     }
   }
 
   InputDecoration _buildInputDecoration(String label) {
     return InputDecoration(
       labelText: label,
-      labelStyle: TextStyle(color: Colors.white70),
+      labelStyle: const TextStyle(color: Colors.white70),
       filled: true,
       fillColor: Colors.grey[850],
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.blueAccent),
+        borderSide: const BorderSide(color: Colors.blueAccent),
         borderRadius: BorderRadius.circular(12),
       ),
     );
@@ -68,11 +121,11 @@ class _DriverRegistrationPageState extends State<DriverRegistrationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1C1C1C), // Dark grey background
+      backgroundColor: const Color(0xFF1C1C1C), // Dark grey background
       appBar: AppBar(
         backgroundColor: Colors.black87,
-        title: Text("Driver Registration", style: TextStyle(color: Colors.white)),
-        iconTheme: IconThemeData(color: Colors.white),
+        title: const Text("Driver Registration", style: TextStyle(color: Colors.white)),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -83,40 +136,46 @@ class _DriverRegistrationPageState extends State<DriverRegistrationPage> {
               TextFormField(
                 controller: nameController,
                 decoration: _buildInputDecoration('Name'),
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
+                validator: (value) => value!.isEmpty ? 'Please enter your name' : null,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: phoneController,
                 decoration: _buildInputDecoration('Phone Number'),
                 keyboardType: TextInputType.phone,
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
+                validator: (value) => value!.isEmpty ? 'Please enter your phone number' : null,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: addressController,
                 decoration: _buildInputDecoration('Home Address'),
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
+                 validator: (value) => value!.isEmpty ? 'Please enter your address' : null,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: emailController,
                 decoration: _buildInputDecoration('Email'),
                 keyboardType: TextInputType.emailAddress,
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
+                readOnly: true, // Make email read-only as it's from Firebase
+                validator: (value) => value!.isEmpty ? 'Email cannot be empty' : null,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: regNumberController,
                 decoration: _buildInputDecoration('Car Registration Number'),
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
+                validator: (value) => value!.isEmpty ? 'Please enter your car registration' : null,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               DropdownButtonFormField<String>(
                 value: selectedCarType,
                 decoration: _buildInputDecoration('Car Type'),
                 dropdownColor: Colors.grey[900],
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
                 items: carTypes.map((type) {
                   return DropdownMenuItem(
                     value: type,
@@ -129,32 +188,34 @@ class _DriverRegistrationPageState extends State<DriverRegistrationPage> {
                   });
                 },
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: licenseNumberController,
                 decoration: _buildInputDecoration('License Number'),
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
+                validator: (value) => value!.isEmpty ? 'Please enter your license number' : null,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: licenseExpiryController,
                 decoration: _buildInputDecoration('License Expiry Date (YYYY-MM-DD)'),
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
+                validator: (value) => value!.isEmpty ? 'Please enter license expiry date' : null,
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) registerDriver();
-                },
+                onPressed: _isLoading ? null : registerDriver, // Disable button when loading
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
-                  padding: EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: Text(
-                  'Register',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                ),
+                child: _isLoading 
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        'Register',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
               ),
             ],
           ),
@@ -163,4 +224,3 @@ class _DriverRegistrationPageState extends State<DriverRegistrationPage> {
     );
   }
 }
-

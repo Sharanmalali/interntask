@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'edit_driver_profile_page.dart'; // ✅ Import the new edit page
 
 class DriverProfilePage extends StatefulWidget {
   const DriverProfilePage({super.key});
@@ -21,7 +22,16 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
     _fetchDriverProfile();
   }
 
+  // ✅ Made this a standalone method so it can be called to refresh
   Future<void> _fetchDriverProfile() async {
+    // Set loading state only if there's no data yet
+    if (_driverData == null) {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+    }
+
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       setState(() {
@@ -32,7 +42,6 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
     }
 
     try {
-      // Force refresh the token to ensure it's not expired
       final idToken = await user.getIdToken(true);
       final url = Uri.parse('http://10.187.64.208:3000/api/drivers/profile');
 
@@ -40,47 +49,62 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $idToken', // Send the token for verification
+          'Authorization': 'Bearer $idToken',
         },
       );
 
-      if (response.statusCode == 200) {
+      if (mounted) {
+        if (response.statusCode == 200) {
+          setState(() {
+            _driverData = json.decode(response.body);
+            _isLoading = false;
+          });
+        } else if (response.statusCode == 404) {
+          setState(() {
+            _error = "Profile not found. Please complete your driver registration.";
+            _isLoading = false;
+          });
+        } else {
+          setState(() {
+            _error = "Failed to load profile. Server returned status ${response.statusCode}";
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
         setState(() {
-          _driverData = json.decode(response.body);
-          _isLoading = false;
-        });
-      } else if (response.statusCode == 404) {
-        setState(() {
-          _error = "Profile not found. Please complete your driver registration.";
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _error = "Failed to load profile. Server returned status ${response.statusCode}";
+          _error = "An error occurred: $e";
           _isLoading = false;
         });
       }
-    } catch (e) {
-      setState(() {
-        _error = "An error occurred: $e";
-        _isLoading = false;
-      });
     }
   }
 
   Future<void> _logout() async {
     await FirebaseAuth.instance.signOut();
     if (mounted) {
-      // Clear all routes and push to the root (AuthHome)
       Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
     }
   }
   
-  void _editProfile() {
-      // We will implement this in the next step
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Edit functionality coming soon!")),
-      );
+  // ✅ Updated edit profile function
+  void _editProfile() async {
+    if (_driverData == null) return;
+
+    // Navigate to the edit page and wait for a result
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditDriverProfilePage(driverData: _driverData!),
+      ),
+    );
+
+    // If the edit page returned 'true', it means the profile was updated
+    if (result == true && mounted) {
+      // Refresh the profile data
+      await _fetchDriverProfile();
+    }
   }
 
   @override
@@ -91,6 +115,11 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
         title: const Text('Driver Profile'),
         backgroundColor: Colors.grey[850],
         actions: [
+            IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: _fetchDriverProfile, // Add a refresh button
+                tooltip: 'Refresh',
+            ),
             IconButton(
                 icon: const Icon(Icons.logout),
                 onPressed: _logout,
@@ -133,7 +162,6 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // A header card for the name
           Card(
             color: Colors.grey[800],
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -167,7 +195,6 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
             ),
           ),
           const SizedBox(height: 20),
-          // Details section
           _buildDetailTile(Icons.phone, 'Phone Number', _driverData!['phone']),
           _buildDetailTile(Icons.home, 'Address', _driverData!['address']),
           _buildDetailTile(Icons.directions_car, 'Car Type', _driverData!['car_type']),
@@ -182,7 +209,7 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
               style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
                   foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 50), // full width
+                  minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                   ),
@@ -193,7 +220,6 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
     );
   }
 
-  // Helper widget to avoid repeating code for each detail
   Widget _buildDetailTile(IconData icon, String title, String? value) {
     return Card(
       color: Colors.grey[850],

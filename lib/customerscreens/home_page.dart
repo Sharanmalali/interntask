@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:interntask/customerscreens/select_car_page.dart';
+import 'package:interntask/customerscreens/customer_profile_page.dart'; // ✅ Import the new profile page
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -9,12 +10,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 1;
+  int _selectedIndex = 1; // Start on the Home tab
 
+  // ✅ Updated pages list
   static const List<Widget> _pages = <Widget>[
-    Center(child: Text('Profile Page', style: TextStyle(color: Colors.white))),
-    SizedBox(), // Home page inline
-    Center(child: Text('Services Page', style: TextStyle(color: Colors.white))),
+    CustomerProfilePage(), // Index 0
+    SizedBox.shrink(),     // Index 1 (Placeholder for the main content)
+    Center(child: Text('Services Page', style: TextStyle(color: Colors.white))), // Index 2
   ];
 
   void _onItemTapped(int index) {
@@ -49,91 +51,8 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: _selectedIndex == 1
-            ? SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextField(
-                      controller: pickupController,
-                      decoration: InputDecoration(
-                        hintText: 'Enter Pickup Location',
-                        filled: true,
-                        fillColor: Colors.white10,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        hintStyle: const TextStyle(color: Colors.white70),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: destinationController,
-                      decoration: InputDecoration(
-                        hintText: 'Enter Destination',
-                        filled: true,
-                        fillColor: Colors.white10,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        hintStyle: const TextStyle(color: Colors.white70),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SelectCarPage()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber,
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: const Text("Choose Car Type"),
-                    ),
-                    const SizedBox(height: 24),
-                    const Text(
-                      'Suggested Rides',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      height: 130,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: const [
-                          RideOption(icon: Icons.directions_car, label: 'Sedan'),
-                          RideOption(icon: Icons.directions_car, label: 'SUV'),
-                          RideOption(icon: Icons.electric_car, label: 'EV'),
-                          RideOption(icon: Icons.local_taxi, label: 'Hatchback'),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    const Text(
-                      'Promotions',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                    const SizedBox(height: 12),
-                    ListView.builder(
-                      itemCount: 3,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) => AdvertisementCard(index: index),
-                    ),
-                  ],
-                ),
-              )
-            : _pages[_selectedIndex],
-      ),
+      // ✅ Use a ternary operator to show the selected page or the main home content
+      body: _selectedIndex == 1 ? _buildHomeContent() : _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.grey[850],
         selectedItemColor: Colors.amber,
@@ -148,8 +67,96 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  // ✅ Extracted the main content into its own widget for clarity
+  Widget _buildHomeContent() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: pickupController,
+              decoration: InputDecoration(
+                hintText: 'Enter Pickup Location',
+                filled: true,
+                fillColor: Colors.white10,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                hintStyle: const TextStyle(color: Colors.white70),
+              ),
+              style: const TextStyle(color: Colors.white),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: destinationController,
+              decoration: InputDecoration(
+                hintText: 'Enter Destination',
+                filled: true,
+                fillColor: Colors.white10,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                hintStyle: const TextStyle(color: Colors.white70),
+              ),
+              style: const TextStyle(color: Colors.white),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SelectCarPage()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text("Choose Car Type"),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Suggested Rides',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 130,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: const [
+                  RideOption(icon: Icons.directions_car, label: 'Sedan'),
+                  RideOption(icon: Icons.directions_car, label: 'SUV'),
+                  RideOption(icon: Icons.electric_car, label: 'EV'),
+                  RideOption(icon: Icons.local_taxi, label: 'Hatchback'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Promotions',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            const SizedBox(height: 12),
+            ListView.builder(
+              itemCount: 3,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) => AdvertisementCard(index: index),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
+// These widgets can be moved to a shared file later
 class RideOption extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -227,11 +234,8 @@ class AdvertisementCard extends StatelessWidget {
           ),
         ),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white60),
-        onTap: () {
-          // Future logic
-        },
+        onTap: () {},
       ),
     );
   }
 }
-
